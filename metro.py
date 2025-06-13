@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import arabic_reshaper
 from bidi.algorithm import get_display
 
+# تعريف خطوط المترو
 metro_lines = {
     "الخط الأول": [
         "حلوان", "عين حلوان", "جامعة حلوان", "وادي حوف", "حدائق حلوان", "المعصرة", "طرة الأسمنت", "كوتسيكا", "طره البلد",
@@ -24,6 +25,7 @@ metro_lines = {
     ]
 }
 
+# إنشاء الجراف
 G = nx.Graph()
 station_to_lines = {}
 
@@ -35,24 +37,38 @@ for line, stations in metro_lines.items():
 
 all_stations = sorted(station_to_lines.keys())
 
-def find_multi_transfer_path(start, end):
-    if start not in G or end not in G:
-        return None, None
+# دالة لإيجاد المسار
+def find_best_path(start, end):
+    if start == end:
+        return [start], "أنت بالفعل في المحطة المطلوبة."
+
+    # 1. تحقق من وجود خط مباشر
+    for line, stations in metro_lines.items():
+        if start in stations and end in stations:
+            i1, i2 = stations.index(start), stations.index(end)
+            path = stations[i1:i2+1] if i1 < i2 else stations[i2:i1+1][::-1]
+            desc = f"🚇 اركب {line} من {start} إلى {end}:\n" + " ← ".join(path[1:])
+            return path, desc
+
+    # 2. ابحث عن أقصر مسار باستخدام NetworkX
     try:
         path = nx.shortest_path(G, start, end)
     except nx.NetworkXNoPath:
-        return None, None
+        return None, "❌ لا يوجد مسار بين المحطتين."
+
+    # 3. بناء الوصف والتحويلات
     description = []
     current_line = None
     for i in range(len(path) - 1):
         edge_data = G.get_edge_data(path[i], path[i + 1])
         line = edge_data['line']
         if line != current_line:
-            description.append(f"\nاركب {line} من {path[i]}")
+            description.append(f"\n🚇 اركب {line} من {path[i]}")
             current_line = line
         description.append(f" ← {path[i + 1]}")
     return path, "".join(description)
 
+# دالة لرسم المسار
 def draw_path(path):
     pos = nx.spring_layout(G, seed=42)
     reshaped_labels = {n: get_display(arabic_reshaper.reshape(n)) for n in G.nodes}
@@ -67,6 +83,7 @@ def draw_path(path):
     ax.axis("off")
     st.pyplot(fig)
 
+# إعداد Streamlit
 st.set_page_config(page_title="دليل مترو القاهرة", layout="centered")
 st.title("🚇 دليل مترو القاهرة")
 
@@ -74,12 +91,9 @@ start = st.selectbox("اختر محطة البداية", all_stations)
 end = st.selectbox("اختر محطة الوصول", all_stations)
 
 if st.button("اعرض المسار"):
-    if start == end:
-        st.info("أنت بالفعل في المحطة المطلوبة.")
+    path, desc = find_best_path(start, end)
+    if path:
+        st.text(desc)
+        draw_path(path)
     else:
-        path, desc = find_multi_transfer_path(start, end)
-        if path:
-            st.text(desc)
-            draw_path(path)
-        else:
-            st.error("لا يوجد مسار بين المحطتين.")
+        st.error(desc)
