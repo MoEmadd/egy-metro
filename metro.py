@@ -97,7 +97,7 @@ def draw_path(path):
 st.set_page_config(page_title="دليل مترو القاهرة", layout="centered")
 
 st.markdown(
-    "<h1 style='text-align: center;'>🚇 دليل مترو القاهرة</h1>",
+    "<h1 style='text-align: center;'>🚇دليل مترو القاهرة</h1>",
     unsafe_allow_html=True
 )
 
