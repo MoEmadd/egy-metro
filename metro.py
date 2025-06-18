@@ -95,7 +95,12 @@ def draw_path(path):
 
 # إعداد Streamlit
 st.set_page_config(page_title="دليل مترو القاهرة", layout="centered")
-st.title("🚇 دليل مترو القاهرة")
+
+st.markdown(
+    "<h1 style='text-align: center;'>🚇 دليل مترو القاهرة</h1>",
+    unsafe_allow_html=True
+)
+
 
 start = st.selectbox("اختر محطة البداية", all_stations)
 end = st.selectbox("اختر محطة الوصول", all_stations)
