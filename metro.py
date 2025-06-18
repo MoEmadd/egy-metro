@@ -36,6 +36,15 @@ for line, stations in metro_lines.items():
     for station in stations:
         station_to_lines.setdefault(station, set()).add(line)
 
+# ربط المحطات المشتركة بين الخطوط (محطات التحويل)
+shared_stations = [
+    ("الشهداء", ["الخط الأول", "الخط الثاني"]),
+    ("السادات", ["الخط الأول", "الخط الثاني"]),
+    ("العتبة", ["الخط الثاني", "الخط الثالث"]),
+    ("ناصر", ["الخط الأول", "الخط الثالث"]),
+]
+
+# لا حاجة لتكرار العقد بل نكتفي بأن كل محطة واحدة مرتبطة بكل الخطوط
 all_stations = sorted(station_to_lines.keys())
 
 # دالة لإيجاد المسار
